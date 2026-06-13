@@ -3,6 +3,7 @@ name: Build PyTorch
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build_libtorch:
