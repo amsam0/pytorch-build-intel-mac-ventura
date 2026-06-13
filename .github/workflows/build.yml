@@ -209,11 +209,7 @@ jobs:
           export CMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
           echo "Applying all patches ..."
-          find ../patches -type f -name "*.patch" -print | sort | while read -r patch; do
-            echo " -> Applying $patch"
-            git apply --check "$patch" || { echo "❌ Failed to apply $patch"; exit 1; }
-            git apply "$patch"
-          done
+          python3 ../patch.py
 
           python setup.py bdist_wheel --plat-name=macosx_11_0_$CMAKE_OSX_ARCHITECTURES
 
