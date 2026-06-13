@@ -6,8 +6,35 @@ on:
   push:
 
 jobs:
+  fetch_pytorch:
+    name: Fetch PyTorch
+    runs-on: macos-15-intel
+    steps:
+      - name: Check PyTorch cache existence
+        id: check-pytorch-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: pytorch
+          key: pytorch-v2.8.0
+          lookup-only: true
+
+      - name: Clone PyTorch repo
+        if: steps.check-pytorch-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 --branch "v2.8.0" --recursive https://github.com/pytorch/pytorch.git pytorch
+          git -C pytorch submodule update --init --recursive --depth 1 || git -C pytorch submodule update --init --recursive --depth 10 || git -C pytorch submodule update --init --recursive
+
+      - name: Save PyTorch source to cache
+        id: cache-save
+        if: steps.check-pytorch-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: pytorch
+          key: pytorch-v2.8.0
+
   build_libtorch:
     name: Build LibTorch
+    needs: [fetch_pytorch]
     runs-on: macos-15-intel
     steps:
       - name: Restore LibTorch ccache Cache
@@ -99,7 +126,7 @@ jobs:
 
   build_wheel:
     runs-on: macos-15-intel
-    needs: [build_libtorch]
+    needs: [fetch_pytorch, build_libtorch]
     strategy:
       matrix:
         python_version: ['3.12']
