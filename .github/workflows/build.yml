@@ -227,6 +227,12 @@ jobs:
             exit 1
           fi
 
+      - name: Upload wheels as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: torch-2.8.0-py${{ matrix.python_version }}-macosx-wheel
+          path: wheels/*.whl
+
       - name: Test PyTorch wheel
         id: test-wheel
         run: |
@@ -237,9 +243,3 @@ jobs:
           pip install wheels/*.whl
 
           python -c "import torch; print(f'Torch version: {torch.__version__}'); print(f'Metal Performance Shaders (MPS) support: {torch.backends.mps.is_built()}')"
-
-      - name: Upload wheels as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: torch-2.8.0-py${{ matrix.python_version }}-macosx-wheel
-          path: wheels/*.whl
